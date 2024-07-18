@@ -19,16 +19,17 @@ type SMAs struct {
 
 // QuoteResponse represents the JSON structure for the quote response
 type IndexResponse struct {
-	Symbol      string  `json:"symbol"`
-	SMA40       float64 `json:"sma_40"`
-	SMA80       float64 `json:"sma_80"`
-	SMA200      float64 `json:"sma_200"`
-	SMAResult   string  `json:"sma_result"`
-	SMAAnalysis string  `json:"sma_analysis"`
-	EMA12       float64 `json:"ema_12"`
-	EMA26       float64 `json:"ema_26"`
-	EMAResult   string  `json:"ema_result"`
-	EMAAnalysis string  `json:"ema_analysis"`
+	Symbol       string  `json:"symbol"`
+	SMA40        float64 `json:"sma_40"`
+	SMA80        float64 `json:"sma_80"`
+	SMA200       float64 `json:"sma_200"`
+	SMAResult    string  `json:"sma_result"`
+	SMAAnalysis  string  `json:"sma_analysis"`
+	EMA12        float64 `json:"ema_12"`
+	EMA26        float64 `json:"ema_26"`
+	EMAResult    string  `json:"ema_result"`
+	EMAAnalysis  string  `json:"ema_analysis"`
+	MACDAnalysis string  `json:"macd_analysis"`
 }
 
 // getQuote handles the retrieval of stock quotes
@@ -96,17 +97,27 @@ func GetIndex(c *gin.Context) {
 	}
 	emaResult, emaAnalysis := analyzeEMACrossover(ema12, ema26)
 
+	// Calculate MACD and Signal line
+	macd, signal, err := calculateMACD(closes)
+	if err != nil {
+		log.Fatalf("Error calculating MACD: %v", err)
+	}
+
+	// Analyze MACD
+	macdAnalysis := analyzeMACD(macd, signal)
+
 	response := IndexResponse{
-		Symbol:      symbol,
-		SMA40:       sma40,
-		SMA80:       sma80,
-		SMA200:      sma200,
-		SMAResult:   smaResult,
-		SMAAnalysis: smaMessage,
-		EMA12:       ema12[len(ema12)-1],
-		EMA26:       ema26[len(ema26)-1],
-		EMAResult:   emaResult,
-		EMAAnalysis: emaAnalysis,
+		Symbol:       symbol,
+		SMA40:        sma40,
+		SMA80:        sma80,
+		SMA200:       sma200,
+		SMAResult:    smaResult,
+		SMAAnalysis:  smaMessage,
+		EMA12:        ema12[len(ema12)-1],
+		EMA26:        ema26[len(ema26)-1],
+		EMAResult:    emaResult,
+		EMAAnalysis:  emaAnalysis,
+		MACDAnalysis: macdAnalysis,
 	}
 
 	c.JSON(http.StatusOK, response)
@@ -193,4 +204,70 @@ func analyzeEMACrossover(ema12, ema26 []float64) (string, string) {
 		return "Potential downtrend", "EMA12 is below EMA26, indicating a potential downtrend."
 	}
 	return "Neutral", "No significant crossover detected."
+}
+
+// calculateMACD calculates the MACD and Signal line
+func calculateMACD(prices []float64) ([]float64, []float64, error) {
+	ema12, err := calculateEMA(prices, 12)
+	if err != nil {
+		return nil, nil, fmt.Errorf("error calculating EMA 12: %v", err)
+	}
+
+	ema26, err := calculateEMA(prices, 26)
+	if err != nil {
+		return nil, nil, fmt.Errorf("error calculating EMA 26: %v", err)
+	}
+
+	// Ensure we have enough data for the MACD calculation
+	minLength := min(len(ema12), len(ema26))
+	ema12 = ema12[len(ema12)-minLength:]
+	ema26 = ema26[len(ema26)-minLength:]
+
+	macd := make([]float64, minLength)
+	for i := range macd {
+		macd[i] = ema12[i] - ema26[i]
+	}
+
+	signal, err := calculateEMA(macd, 9)
+	if err != nil {
+		return nil, nil, fmt.Errorf("error calculating Signal line: %v", err)
+	}
+
+	return macd, signal, nil
+}
+
+// min returns the smaller of x or y.
+func min(x, y int) int {
+	if x < y {
+		return x
+	}
+	return y
+}
+
+// analyzeMACD analyzes the MACD and Signal line for crossovers
+func analyzeMACD(macd, signal []float64) string {
+	if len(macd) == 0 || len(signal) == 0 {
+		return "Not enough data for MACD analysis."
+	}
+
+	// Determine the most recent values
+	latestMACD := macd[len(macd)-1]
+	latestSignal := signal[len(signal)-1]
+
+	// Determine the previous values
+	prevMACD := macd[len(macd)-2]
+	prevSignal := signal[len(signal)-2]
+
+	// Analyze the crossover
+	if latestMACD > latestSignal && prevMACD <= prevSignal {
+		return "Bullish crossover detected. MACD has crossed above the Signal line, indicating a potential uptrend."
+	} else if latestMACD < latestSignal && prevMACD >= prevSignal {
+		return "Bearish crossover detected. MACD has crossed below the Signal line, indicating a potential downtrend."
+	} else if latestMACD > latestSignal {
+		return "MACD is above the Signal line, indicating a potential uptrend."
+	} else if latestMACD < latestSignal {
+		return "MACD is below the Signal line, indicating a potential downtrend."
+	}
+
+	return "No significant crossover detected."
 }
