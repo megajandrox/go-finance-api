@@ -1,6 +1,8 @@
 package models
 
-import "time"
+import (
+	"time"
+)
 
 type PositionType int
 
@@ -77,4 +79,44 @@ type Indicators struct {
 	MACD       float64 // MACD
 	MACDSignal float64 // Señal del MACD
 	ATR14      float64 // ATR de 14 días
+}
+
+type TrendType int
+
+// Definimos las constantes que representarán los valores del enumerador
+const (
+	Uptrend TrendType = iota
+	Potential_Uptrend
+	Downtrend
+	Potential_Downtrend
+	Shortterm_Uptrend_Longterm_Downtrend
+	Shortterm_Downtrend_Longterm_Uptrend
+	Overbought
+	Oversold
+	Neutral
+)
+
+func (t TrendType) String() string {
+	switch t {
+	case Uptrend:
+		return "Uptrend"
+	case Downtrend:
+		return "Downtrend"
+	case Potential_Uptrend:
+		return "Potential Uptrend"
+	case Potential_Downtrend:
+		return "Potential Downtrend"
+	case Shortterm_Uptrend_Longterm_Downtrend:
+		return "Short-term Uptrend, Long-term Downtrend"
+	case Shortterm_Downtrend_Longterm_Uptrend:
+		return "Short-term Downtrend, Long-term Uptrend"
+	case Overbought:
+		return "Overbought"
+	case Oversold:
+		return "Oversold"
+	case Neutral:
+		return "Neutral"
+	default:
+		return "Unknown TrendType"
+	}
 }
