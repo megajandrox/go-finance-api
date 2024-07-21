@@ -46,7 +46,7 @@ func (ema *EMA) CalculateEMA(prices []float64, period int) ([]float64, error) {
 		return nil, fmt.Errorf("not enough data to calculate EMA for the given period")
 	}
 
-	// Initialize the EMA array
+	// Initialize the EMA array with the same length as prices
 	emaArray := make([]float64, len(prices))
 
 	// Calculate the initial SMA to start the EMA
@@ -54,7 +54,8 @@ func (ema *EMA) CalculateEMA(prices []float64, period int) ([]float64, error) {
 	for i := 0; i < period; i++ {
 		sum += prices[i]
 	}
-	emaArray[period-1] = sum / float64(period)
+	initialSMA := sum / float64(period)
+	emaArray[period-1] = initialSMA
 
 	// Calculate the smoothing factor
 	alpha := 2.0 / float64(period+1)
@@ -72,6 +73,14 @@ func (ema *EMA) Analyze(inputValues [][]float64) error {
 	var ema12, ema26 []float64
 	var trendType TrendType = Neutral
 	var result string = "The SMAs are not in a clear order to confirm a specific trend."
+	if len(inputValues) == 0 {
+		trendType = Neutral
+		result = "Not enough data for analysis."
+		ema.TrendType = trendType
+		ema.Result = result
+		return fmt.Errorf("Not enough data for analysis.")
+	}
+
 	status, err := ema.calculate(inputValues[0])
 	if !status {
 		trendType = Neutral
@@ -82,7 +91,7 @@ func (ema *EMA) Analyze(inputValues [][]float64) error {
 	}
 	ema12 = ema.EMA12
 	ema26 = ema.EMA26
-	if len(ema12) == 0 || len(ema26) == 0 {
+	if len(ema12) <= 1 || len(ema26) <= 1 {
 		trendType = Neutral
 		result = "Not enough data for analysis."
 		ema.TrendType = trendType
