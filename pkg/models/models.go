@@ -1,6 +1,7 @@
 package models
 
 import (
+	"fmt"
 	"time"
 )
 
@@ -119,4 +120,73 @@ func (t TrendType) String() string {
 	default:
 		return "Unknown TrendType"
 	}
+}
+
+type Analyzer interface {
+	Analyze(inputValues [][]float64) error
+	SetIndex(indexes *Indexes) *Indexes
+}
+
+// runAnalysis es una función genérica que ejecuta el análisis utilizando la interfaz Analyzer
+func RunAnalysis[T Analyzer](symbol string, inputValues [][]float64, indexes *Indexes, newAnalyzer func(string) (T, error)) (*Indexes, error) {
+	analyzer, err := newAnalyzer(symbol)
+	if err != nil {
+		return nil, fmt.Errorf("error creating analyzer: %w", err)
+	}
+	err = analyzer.Analyze(inputValues)
+	if err != nil {
+		return nil, fmt.Errorf("error analyzing trend: %w", err)
+	}
+	ind := analyzer.SetIndex(indexes)
+	return ind, nil
+}
+
+type Indexes struct {
+	symbol     string
+	SMA        SMA
+	EMA        EMA
+	MACD       MACD
+	RSI        RSI
+	Stochastic Stochastic
+	Volume     Volume
+	OBV        OBV
+	RVOL       RVOL
+}
+
+func NewIndexes(symbol string) *Indexes {
+	return &Indexes{symbol: symbol}
+}
+
+// Adapter functions to convert specific analyzers to Analyzer interface
+func NewSMAAdapter(symbol string) (Analyzer, error) {
+	return NewSMA(symbol)
+}
+
+// Define similar adapter functions for other analyzers
+func NewEMAAdapter(symbol string) (Analyzer, error) {
+	return NewEMA(symbol)
+}
+
+func NewMACDAdapter(symbol string) (Analyzer, error) {
+	return NewMACD(symbol)
+}
+
+func NewRSIAdapter(symbol string) (Analyzer, error) {
+	return NewRSI(symbol)
+}
+
+func NewStochasticAdapter(symbol string) (Analyzer, error) {
+	return NewStochastic(symbol)
+}
+
+func NewVolumeAdapter(symbol string) (Analyzer, error) {
+	return NewVolume(symbol)
+}
+
+func NewOBVAdapter(symbol string) (Analyzer, error) {
+	return NewOBV(symbol)
+}
+
+func NewRVOLAdapter(symbol string) (Analyzer, error) {
+	return NewRVOL(symbol)
 }

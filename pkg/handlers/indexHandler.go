@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/megajandrox/go-finance-api/pkg/services"
@@ -28,7 +29,31 @@ type IndexResponse struct {
 // getQuote handles the retrieval of stock quotes
 func GetIndex(c *gin.Context) {
 	symbol := c.Param("symbol")
-	indexes, _ := services.FindIndexesBySymbol(symbol)
+	fromParam := c.Query("from")
+	if fromParam == "" {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "Query parameter 'from' is required.",
+		})
+		return
+	}
+
+	// Convert the query parameter `from` to an integer
+	from, err := strconv.Atoi(fromParam)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "Invalid query parameter. 'from' must be an integer.",
+		})
+		return
+	}
+
+	if from < 2 {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "Invalid query parameter. 'from' must be greater than 1.",
+		})
+		return
+	}
+
+	indexes, _ := services.FindIndexesBySymbol(symbol, from)
 	response := IndexResponse{
 		Symbol:                       symbol,
 		SMAResult:                    indexes.SMA.TrendType.String(),

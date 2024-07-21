@@ -19,6 +19,11 @@ func NewOBV(symbol string) (*OBV, error) {
 	return &OBV{symbol: symbol}, nil
 }
 
+func (i *OBV) SetIndex(indexes *Indexes) *Indexes {
+	indexes.OBV = *i
+	return indexes
+}
+
 func (obv *OBV) calculate(closes, volumes []float64) (bool, error) {
 	// Calculate OBV
 	obvArray, err := obv.calculateOBV(closes, volumes)
@@ -52,8 +57,8 @@ func (obv *OBV) calculateOBV(closes, volumes []float64) ([]float64, error) {
 }
 
 // analyzeOBV analyzes the OBV data to determine accumulation or distribution
-func (obv *OBV) AnalyzeOBV(closes, volumes []float64) {
-	status, err := obv.calculate(closes, volumes)
+func (obv *OBV) Analyze(inputValues [][]float64) error {
+	status, err := obv.calculate(inputValues[0], inputValues[3])
 	var trendType TrendType
 	var result string
 	if !status {
@@ -61,12 +66,12 @@ func (obv *OBV) AnalyzeOBV(closes, volumes []float64) {
 		result = fmt.Sprintf("It is not possible to calculate OBV due to:%s", err)
 		obv.TrendType = trendType
 		obv.Result = result
-		return
+		return fmt.Errorf("It is not possible to calculate OBV due to:%s", err)
 	}
 	if len(obv.OBVArray) < 2 {
 		obv.TrendType = Neutral
 		obv.Result = "Not enough data to analyze OBV."
-		return
+		return fmt.Errorf("Not enough data to analyze OBV.")
 	}
 
 	isRising := false
@@ -86,5 +91,5 @@ func (obv *OBV) AnalyzeOBV(closes, volumes []float64) {
 		obv.TrendType = Neutral
 		obv.Result = fmt.Sprintf("OBV indicates no significant change with a final value of %.2f. OBV is rising: %v.", obv.OBVArray[len(obv.OBVArray)-1], isRising)
 	}
-	return
+	return nil
 }

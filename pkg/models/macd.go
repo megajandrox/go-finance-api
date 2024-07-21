@@ -20,6 +20,11 @@ func NewMACD(symbol string) (*MACD, error) {
 	return &MACD{symbol: symbol}, nil
 }
 
+func (i *MACD) SetIndex(indexes *Indexes) *Indexes {
+	indexes.MACD = *i
+	return indexes
+}
+
 // calculateMACD calculates the MACD and Signal line
 func (macd *MACD) calculate(closes []float64) (bool, error) {
 	// Calculate EMA for 12-day and 26-day periods
@@ -27,7 +32,9 @@ func (macd *MACD) calculate(closes []float64) (bool, error) {
 	if errEMA != nil {
 		return false, fmt.Errorf("Error creating EMA: %v", errEMA)
 	}
-	ema.AnalyzeEMACrossover(closes)
+	var inputValues [][]float64
+	inputValues = append(inputValues, closes)
+	ema.Analyze(inputValues)
 	var ema12, ema26 []float64
 	ema12 = ema.EMA12
 	ema26 = ema.EMA26
@@ -51,25 +58,25 @@ func (macd *MACD) calculate(closes []float64) (bool, error) {
 }
 
 // analyzeMACD analyzes the MACD and Signal line for crossovers
-func (macd *MACD) AnalyzeMACD(closes []float64) {
+func (macd *MACD) Analyze(inputValues [][]float64) error {
 	var macdArray, signal []float64
 	var trendType TrendType = Neutral
 	var result string = "The SMAs are not in a clear order to confirm a specific trend."
-	status, err := macd.calculate(closes)
+	status, err := macd.calculate(inputValues[0])
 	if !status {
 		trendType = Neutral
 		result = fmt.Sprintf("It is not possible to calculate MACD due to: %s", err)
 		macd.TrendType = trendType
 		macd.Result = result
-		return
-	}
-	if len(macdArray) == 0 || len(signal) == 0 {
-		macd.TrendType = Neutral
-		macd.Result = "Not enough data for MACD analysis."
-		return
+		return fmt.Errorf("It is not possible to calculate MACD due to: %s", err)
 	}
 	macdArray = macd.MACDArray
 	signal = macd.MACDSignal
+	if len(macdArray) == 0 || len(signal) == 0 {
+		macd.TrendType = Neutral
+		macd.Result = "Not enough data for MACD analysis."
+		return fmt.Errorf("Not enough data for MACD analysis.")
+	}
 	// Determine the most recent values
 	latestMACD := macdArray[len(macdArray)-1]
 	latestSignal := signal[len(signal)-1]
@@ -94,4 +101,5 @@ func (macd *MACD) AnalyzeMACD(closes []float64) {
 		macd.TrendType = Potential_Downtrend
 		macd.Result = "MACD is below the Signal line, indicating a potential downtrend."
 	}
+	return nil
 }

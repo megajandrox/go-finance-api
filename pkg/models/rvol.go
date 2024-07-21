@@ -19,6 +19,11 @@ func NewRVOL(symbol string) (*RVOL, error) {
 	return &RVOL{symbol: symbol}, nil
 }
 
+func (i *RVOL) SetIndex(indexes *Indexes) *Indexes {
+	indexes.RVOL = *i
+	return indexes
+}
+
 func (rvol *RVOL) calculate(volumes []float64) (bool, error) {
 	// Calculate RVOL for a 20-day period
 	rvolValue, err := rvol.calculateRVOL(volumes, 20)
@@ -53,13 +58,13 @@ func (rvol *RVOL) calculateRVOL(volumes []float64, period int) (float64, error) 
 }
 
 // analyzeRVOL analyzes the RVOL value and returns a descriptive analysis
-func (rvol *RVOL) AnalyzeRVOL(volumes []float64) {
-	status, err := rvol.calculate(volumes)
+func (rvol *RVOL) Analyze(inputValues [][]float64) error {
+	status, err := rvol.calculate(inputValues[3])
 	rvol.TrendType = Neutral
 	var result string
 	if !status {
 		rvol.Result = fmt.Sprintf("It is not possible to calculate RVOL due to: %s", err)
-		return
+		return fmt.Errorf("It is not possible to calculate RVOL due to: %s", err)
 	}
 	if rvol.RVOLValue > 1.0 {
 		result = fmt.Sprintf("RVOL is %.2f, indicating a higher than average volume.", rvol.RVOLValue)
@@ -69,4 +74,5 @@ func (rvol *RVOL) AnalyzeRVOL(volumes []float64) {
 		result = fmt.Sprintf("RVOL is %.2f, indicating an average volume.", rvol.RVOLValue)
 	}
 	rvol.Result = result
+	return nil
 }

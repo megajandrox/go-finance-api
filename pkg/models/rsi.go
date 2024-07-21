@@ -19,6 +19,11 @@ func NewRSI(symbol string) (*RSI, error) {
 	return &RSI{symbol: symbol}, nil
 }
 
+func (i *RSI) SetIndex(indexes *Indexes) *Indexes {
+	indexes.RSI = *i
+	return indexes
+}
+
 func (rsi *RSI) calculate(closes []float64) (bool, error) {
 	// Calculate RSI for 14-day period
 	rsiArray, err := rsi.calculateRSI(closes, 14)
@@ -79,8 +84,8 @@ func (rsi *RSI) calculateRSI(prices []float64, period int) ([]float64, error) {
 }
 
 // analyzeRSI analyzes the RSI value and returns a descriptive analysis
-func (rsi *RSI) AnalyzeRSI(closes []float64) {
-	status, err := rsi.calculate(closes)
+func (rsi *RSI) Analyze(inputValues [][]float64) error {
+	status, err := rsi.calculate(inputValues[0])
 	var trendType TrendType = Neutral
 	var result string = "The RSIs are not in a clear order to confirm a specific trend."
 	if !status {
@@ -88,7 +93,7 @@ func (rsi *RSI) AnalyzeRSI(closes []float64) {
 		result = fmt.Sprintf("It is not possible to calculate RSI due to: %s", err)
 		rsi.TrendType = trendType
 		rsi.Result = result
-		return
+		return fmt.Errorf("It is not possible to calculate RSI due to: %s", err)
 	}
 	if rsi.LatestRSI > 70 {
 		trendType = Overbought
@@ -102,4 +107,5 @@ func (rsi *RSI) AnalyzeRSI(closes []float64) {
 	}
 	rsi.TrendType = trendType
 	rsi.Result = result
+	return nil
 }

@@ -20,6 +20,11 @@ func NewEMA(symbol string) (*EMA, error) {
 	return &EMA{symbol: symbol}, nil
 }
 
+func (i *EMA) SetIndex(indexes *Indexes) *Indexes {
+	indexes.EMA = *i
+	return indexes
+}
+
 func (ema *EMA) calculate(closes []float64) (bool, error) {
 	// Calculate EMA for 12-day and 26-day periods
 	ema12, err := ema.CalculateEMA(closes, 12)
@@ -63,17 +68,17 @@ func (ema *EMA) CalculateEMA(prices []float64, period int) ([]float64, error) {
 }
 
 // analyzeEMACrossover analyzes the crossover between EMA12 and EMA26
-func (ema *EMA) AnalyzeEMACrossover(closes []float64) {
+func (ema *EMA) Analyze(inputValues [][]float64) error {
 	var ema12, ema26 []float64
 	var trendType TrendType = Neutral
 	var result string = "The SMAs are not in a clear order to confirm a specific trend."
-	status, err := ema.calculate(closes)
+	status, err := ema.calculate(inputValues[0])
 	if !status {
 		trendType = Neutral
 		result = fmt.Sprintf("It is not possible to calculate EMA due to: %s", err)
 		ema.TrendType = trendType
 		ema.Result = result
-		return
+		return fmt.Errorf("It is not possible to calculate EMA due to: %s", err)
 	}
 	ema12 = ema.EMA12
 	ema26 = ema.EMA26
@@ -82,7 +87,7 @@ func (ema *EMA) AnalyzeEMACrossover(closes []float64) {
 		result = "Not enough data for analysis."
 		ema.TrendType = trendType
 		ema.Result = result
-		return
+		return fmt.Errorf("Not enough data for analysis.")
 	}
 
 	// Determine the most recent values
@@ -111,4 +116,5 @@ func (ema *EMA) AnalyzeEMACrossover(closes []float64) {
 	}
 	ema.TrendType = trendType
 	ema.Result = result
+	return nil
 }

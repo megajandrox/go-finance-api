@@ -20,6 +20,11 @@ func NewStochastic(symbol string) (*Stochastic, error) {
 	return &Stochastic{symbol: symbol}, nil
 }
 
+func (i *Stochastic) SetIndex(indexes *Indexes) *Indexes {
+	indexes.Stochastic = *i
+	return indexes
+}
+
 func (sto *Stochastic) calculate(closes, highs, lows []float64) (bool, error) {
 	// Calculate Stochastic Oscillator for 14-day period
 	k, d, err := sto.calculateStochasticOscillator(closes, highs, lows, 14)
@@ -62,8 +67,8 @@ func (sto *Stochastic) calculateStochasticOscillator(closes, highs, lows []float
 }
 
 // analyzeStochasticOscillator analyzes the Stochastic Oscillator values
-func (sto *Stochastic) AnalyzeStochasticOscillator(closes, highs, lows []float64) {
-	status, err := sto.calculate(closes, highs, lows)
+func (sto *Stochastic) Analyze(inputValues [][]float64) error {
+	status, err := sto.calculate(inputValues[0], inputValues[2], inputValues[1])
 	latestK := sto.K[len(sto.K)-1]
 	latestD := sto.D[len(sto.D)-1]
 	var trendType TrendType = Neutral
@@ -73,12 +78,12 @@ func (sto *Stochastic) AnalyzeStochasticOscillator(closes, highs, lows []float64
 		result = fmt.Sprintf("It is not possible to calculate SMA because: %s", err)
 		sto.TrendType = trendType
 		sto.Result = result
-		return
+		return fmt.Errorf("It is not possible to calculate SMA because: %s", err)
 	}
 	if len(sto.K) == 0 || len(sto.D) == 0 {
 		sto.TrendType = Neutral
 		sto.Result = "Not enough data for Stochastic Oscillator analysis."
-		return
+		return fmt.Errorf("Not enough data for Stochastic Oscillator analysis.")
 	}
 
 	if latestK > 80 && latestD > 80 {
@@ -90,4 +95,5 @@ func (sto *Stochastic) AnalyzeStochasticOscillator(closes, highs, lows []float64
 	}
 	sto.TrendType = trendType
 	sto.Result = result
+	return nil
 }

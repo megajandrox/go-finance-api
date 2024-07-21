@@ -21,6 +21,11 @@ func NewSMA(symbol string) (*SMA, error) {
 	return &SMA{symbol: symbol}, nil
 }
 
+func (sma *SMA) SetIndex(indexes *Indexes) *Indexes {
+	indexes.SMA = *sma
+	return indexes
+}
+
 func (sma *SMA) calculate(closes []float64) (bool, error) {
 	sma40, err := sma.calculateSMAN(closes, 40)
 	if err != nil {
@@ -53,8 +58,8 @@ func (sma *SMA) calculateSMAN(closes []float64, n int) (float64, error) {
 }
 
 // analyzeSMATrend analyzes the relationship between the SMAs to determine if it's an uptrend
-func (sma *SMA) AnalyzeSMATrend(closes []float64) {
-	status, err := sma.calculate(closes)
+func (sma *SMA) Analyze(inputValues [][]float64) error {
+	status, err := sma.calculate(inputValues[0])
 	var trendType TrendType = Neutral
 	var result string = "The SMAs are not in a clear order to confirm a specific trend."
 	if !status {
@@ -62,7 +67,7 @@ func (sma *SMA) AnalyzeSMATrend(closes []float64) {
 		result = fmt.Sprintf("It is not possible to calculate SMA because: %s", err)
 		sma.TrendType = trendType
 		sma.Result = result
-		return
+		return fmt.Errorf("It is not possible to calculate SMA because: %s", err)
 	}
 	if sma.SMA40 > sma.SMA80 && sma.SMA80 > sma.SMA200 {
 		trendType = Uptrend
@@ -79,4 +84,5 @@ func (sma *SMA) AnalyzeSMATrend(closes []float64) {
 	}
 	sma.TrendType = trendType
 	sma.Result = result
+	return nil
 }
