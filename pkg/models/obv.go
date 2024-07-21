@@ -58,7 +58,7 @@ func (obv *OBV) AnalyzeOBV(closes, volumes []float64) {
 	var result string
 	if !status {
 		trendType = Neutral
-		result = fmt.Sprintf("No es posible calcular OBV debido a: %s", err)
+		result = fmt.Sprintf("It is not possible to calculate OBV due to:%s", err)
 		obv.TrendType = trendType
 		obv.Result = result
 		return

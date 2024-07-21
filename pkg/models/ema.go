@@ -66,11 +66,11 @@ func (ema *EMA) CalculateEMA(prices []float64, period int) ([]float64, error) {
 func (ema *EMA) AnalyzeEMACrossover(closes []float64) {
 	var ema12, ema26 []float64
 	var trendType TrendType = Neutral
-	var result string = "Las SMAs no están en un orden claro para confirmar una tendencia específica."
+	var result string = "The SMAs are not in a clear order to confirm a specific trend."
 	status, err := ema.calculate(closes)
 	if !status {
 		trendType = Neutral
-		result = fmt.Sprintf("No es posible calcular EMA debido a: %s", err)
+		result = fmt.Sprintf("It is not possible to calculate EMA due to: %s", err)
 		ema.TrendType = trendType
 		ema.Result = result
 		return

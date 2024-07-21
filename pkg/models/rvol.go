@@ -58,7 +58,7 @@ func (rvol *RVOL) AnalyzeRVOL(volumes []float64) {
 	rvol.TrendType = Neutral
 	var result string
 	if !status {
-		rvol.Result = fmt.Sprintf("No es posible calcular RVOL debido a: %s", err)
+		rvol.Result = fmt.Sprintf("It is not possible to calculate RVOL due to: %s", err)
 		return
 	}
 	if rvol.RVOLValue > 1.0 {

@@ -70,7 +70,7 @@ func (sto *Stochastic) AnalyzeStochasticOscillator(closes, highs, lows []float64
 	var result string = fmt.Sprintf("Stochastic Oscillator is %.2f/%.2f, indicating normal market conditions.", latestK, latestD)
 	if !status {
 		trendType = Neutral
-		result = fmt.Sprintf("No es posible calcular SMA debido a: %s", err)
+		result = fmt.Sprintf("It is not possible to calculate SMA because: %s", err)
 		sto.TrendType = trendType
 		sto.Result = result
 		return

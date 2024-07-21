@@ -6,7 +6,7 @@ import (
 
 type PositionType int
 
-// Definimos las constantes que representarán los valores del enumerador
+// Define constants representing the enumerator values
 const (
 	Sell PositionType = iota
 	Buy
@@ -14,76 +14,76 @@ const (
 
 type MarketType int
 
-// Definimos las constantes que representarán los valores del enumerador
+// Define constants representing the enumerator values
 const (
 	Equity MarketType = iota
 	ETF
 )
 
 /*
- * This struct gonna be persisted for long term
+ * This struct is going to be persisted for the long term
  */
 type Position struct {
-	Symbol       string       // Símbolo del activo financiero
-	EntryPrice   float64      // Precio de entrada
-	ExitPrice    float64      // Precio de salida
-	Quantity     int          // Cantidad de acciones/compras
-	EntryTime    time.Time    // Tiempo de entrada
-	ExitTime     time.Time    // Tiempo de salida
-	PositionType PositionType // Tipo de posición (compra o venta)
-	MarketType   MarketType   // Mercado (Acciones , ETFs)
-	Balance      float64      // Ganancia o pérdida
-	Indicators   Indicators   // Indicadores técnicos utilizados en la decisión
+	Symbol       string       // Financial asset symbol
+	EntryPrice   float64      // Entry price
+	ExitPrice    float64      // Exit price
+	Quantity     int          // Quantity of shares/buys
+	EntryTime    time.Time    // Entry time
+	ExitTime     time.Time    // Exit time
+	PositionType PositionType // Position type (buy or sell)
+	MarketType   MarketType   // Market (Equities, ETFs)
+	Balance      float64      // Profit or loss
+	Indicators   Indicators   // Technical indicators used in the decision
 }
 
 /*
- * This struct could be persisted for short term
+ * This struct could be persisted for the short term
  */
 type TradeHistory struct {
-	Positions    []Position // Lista de todas las posiciones
-	TotalBalance float64    // Ganancia o pérdida total
+	Positions    []Position // List of all positions
+	TotalBalance float64    // Total profit or loss
 }
 
-// AddPosition agrega una posición al historial y actualiza la ganancia/pérdida total.
+// AddPosition adds a position to the history and updates the total profit/loss.
 func (th *TradeHistory) AddPosition(position Position) {
 	th.Positions = append(th.Positions, position)
 	th.TotalBalance += position.Balance
 }
 
 /*
- * This struct gonna be persisted for long term because has
+ * This struct is going to be persisted for the long term because it contains
  */
-// MarketData guarda información de mercado obtenida periódicamente.
+// MarketData stores market information obtained periodically.
 type MarketData struct {
-	Symbol     string     // Símbolo del activo financiero
-	Timestamp  time.Time  // Marca de tiempo del dato
-	Open       float64    // Precio de apertura
-	High       float64    // Precio más alto
-	Low        float64    // Precio más bajo
-	Close      float64    // Precio de cierre
-	Volume     int64      // Volumen negociado
-	Indicators Indicators // Indicadores técnicos aplicados
+	Symbol     string     // Financial asset symbol
+	Timestamp  time.Time  // Data timestamp
+	Open       float64    // Opening price
+	High       float64    // Highest price
+	Low        float64    // Lowest price
+	Close      float64    // Closing price
+	Volume     int64      // Traded volume
+	Indicators Indicators // Applied technical indicators
 }
 
 /*
- * This struct is not gonna be persisted
+ * This struct is not going to be persisted
  */
-// Indicators almacena los valores de los indicadores técnicos aplicados.
+// Indicators stores the values of the applied technical indicators.
 type Indicators struct {
-	SMA40      float64 // Media Móvil Simple de 40 días
-	SMA80      float64 // Media Móvil Simple de 80 días
-	SMA200     float64 // Media Móvil Simple de 200 días
-	EMA12      float64 // Media Móvil Exponencial de 12 días
-	EMA26      float64 // Media Móvil Exponencial de 26 días
-	RSI14      float64 // Índice de Fuerza Relativa de 14 días
+	SMA40      float64 // 40-day Simple Moving Average
+	SMA80      float64 // 80-day Simple Moving Average
+	SMA200     float64 // 200-day Simple Moving Average
+	EMA12      float64 // 12-day Exponential Moving Average
+	EMA26      float64 // 26-day Exponential Moving Average
+	RSI14      float64 // 14-day Relative Strength Index
 	MACD       float64 // MACD
-	MACDSignal float64 // Señal del MACD
-	ATR14      float64 // ATR de 14 días
+	MACDSignal float64 // MACD Signal
+	ATR14      float64 // 14-day ATR
 }
 
 type TrendType int
 
-// Definimos las constantes que representarán los valores del enumerador
+// Define constants representing the enumerator values
 const (
 	Uptrend TrendType = iota
 	Potential_Uptrend

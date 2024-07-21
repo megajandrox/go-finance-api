@@ -56,26 +56,26 @@ func (sma *SMA) calculateSMAN(closes []float64, n int) (float64, error) {
 func (sma *SMA) AnalyzeSMATrend(closes []float64) {
 	status, err := sma.calculate(closes)
 	var trendType TrendType = Neutral
-	var result string = "Las SMAs no están en un orden claro para confirmar una tendencia específica."
+	var result string = "The SMAs are not in a clear order to confirm a specific trend."
 	if !status {
 		trendType = Neutral
-		result = fmt.Sprintf("No es posible calcular SMA debido a: %s", err)
+		result = fmt.Sprintf("It is not possible to calculate SMA because: %s", err)
 		sma.TrendType = trendType
 		sma.Result = result
 		return
 	}
 	if sma.SMA40 > sma.SMA80 && sma.SMA80 > sma.SMA200 {
 		trendType = Uptrend
-		result = "SMA 40 > SMA 80 > SMA 200: Esta relación sugiere que el precio de la acción está en una tendencia alcista. Las SMAs más cortas (40 días) están por encima de las SMAs más largas (80 y 200 días), lo que indica que los precios recientes están más altos que los precios pasados."
+		result = "SMA 40 > SMA 80 > SMA 200: This ratio suggests that the stock price is in an uptrend. The shorter SMAs (40 days) are above the longer SMAs (80 and 200 days), indicating that recent prices are higher than past prices."
 	} else if sma.SMA40 < sma.SMA80 && sma.SMA80 < sma.SMA200 {
 		trendType = Downtrend
-		result = "SMA 40 < SMA 80 < SMA 200: Esta relación sugiere que el precio de la acción está en una tendencia bajista. Las SMAs más cortas (40 días) están por debajo de las SMAs más largas (80 y 200 días), lo que indica que los precios recientes están más bajos que los precios pasados."
+		result = "SMA 40 < SMA 80 < SMA 200: This ratio suggests that the stock price is in a downtrend. The shorter SMAs (40 days) are below the longer SMAs (80 and 200 days), indicating that recent prices are lower than past prices."
 	} else if sma.SMA40 > sma.SMA80 && sma.SMA80 < sma.SMA200 {
 		trendType = Shortterm_Uptrend_Longterm_Downtrend
-		result = "SMA 40 > SMA 80 < SMA 200: Esta relación sugiere que el precio de la acción puede estar en una recuperación a corto plazo, pero sigue en una tendencia bajista a largo plazo."
+		result = "SMA 40 > SMA 80 < SMA 200: This relationship suggests that the stock price may be in a short-term recovery, but is still in a long-term downtrend."
 	} else if sma.SMA40 < sma.SMA80 && sma.SMA80 > sma.SMA200 {
 		trendType = Shortterm_Downtrend_Longterm_Uptrend
-		result = "SMA 40 < SMA 80 > SMA 200: Esta relación sugiere que el precio de la acción puede estar en una corrección a corto plazo, pero sigue en una tendencia alcista a largo plazo."
+		result = "SMA 40 < SMA 80 > SMA 200: This relationship suggests that the stock price may be in a short-term correction, but is still in a long-term uptrend."
 	}
 	sma.TrendType = trendType
 	sma.Result = result

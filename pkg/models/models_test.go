@@ -49,18 +49,18 @@ func TestTradeHistory(t *testing.T) {
 
 	// Comprobar que la posición se añadió correctamente
 	if len(tradeHistory.Positions) != 1 {
-		t.Errorf("Esperaba 1 posición, pero obtuve %d", len(tradeHistory.Positions))
+		t.Errorf("I was expecting 1 position, but I got %d", len(tradeHistory.Positions))
 	}
 
 	// Comprobar que los datos de la posición son correctos
 	pos := tradeHistory.Positions[0]
 	fmt.Println(pos)
 	if pos.Symbol != "AAPL" || pos.EntryPrice != 150.0 || pos.ExitPrice != 154.0 || pos.Quantity != 100 || pos.PositionType != Buy || pos.Balance != 400.0 || pos.MarketType != Equity {
-		t.Errorf("Los datos de la posición no son los esperados")
+		t.Errorf("The position data is not as expected.")
 	}
 
 	// Comprobar que el cálculo de la ganancia/pérdida total es correcto
 	if tradeHistory.TotalBalance != 400.0 {
-		t.Errorf("Esperaba una ganancia/pérdida total de 400.0, pero obtuve %.2f", tradeHistory.TotalBalance)
+		t.Errorf("I expected a total profit/loss of 400.0, but I got %.2f", tradeHistory.TotalBalance)
 	}
 }

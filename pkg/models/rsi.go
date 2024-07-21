@@ -82,10 +82,10 @@ func (rsi *RSI) calculateRSI(prices []float64, period int) ([]float64, error) {
 func (rsi *RSI) AnalyzeRSI(closes []float64) {
 	status, err := rsi.calculate(closes)
 	var trendType TrendType = Neutral
-	var result string = "Las RSI no están en un orden claro para confirmar una tendencia específica."
+	var result string = "The RSIs are not in a clear order to confirm a specific trend."
 	if !status {
 		trendType = Neutral
-		result = fmt.Sprintf("No es posible calcular RSI debido a: %s", err)
+		result = fmt.Sprintf("It is not possible to calculate RSI due to: %s", err)
 		rsi.TrendType = trendType
 		rsi.Result = result
 		return

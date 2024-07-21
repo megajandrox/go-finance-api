@@ -54,11 +54,11 @@ func (macd *MACD) calculate(closes []float64) (bool, error) {
 func (macd *MACD) AnalyzeMACD(closes []float64) {
 	var macdArray, signal []float64
 	var trendType TrendType = Neutral
-	var result string = "Las SMAs no están en un orden claro para confirmar una tendencia específica."
+	var result string = "The SMAs are not in a clear order to confirm a specific trend."
 	status, err := macd.calculate(closes)
 	if !status {
 		trendType = Neutral
-		result = fmt.Sprintf("No es posible calcular MACD debido a: %s", err)
+		result = fmt.Sprintf("It is not possible to calculate MACD due to: %s", err)
 		macd.TrendType = trendType
 		macd.Result = result
 		return
