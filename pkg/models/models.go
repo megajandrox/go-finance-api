@@ -95,6 +95,10 @@ const (
 	Overbought
 	Oversold
 	Neutral
+	IncreasedTradingRisk
+	ModerateTradingRisk
+	LowerTradingRisk
+	None
 )
 
 func (t TrendType) String() string {
@@ -117,6 +121,14 @@ func (t TrendType) String() string {
 		return "Oversold"
 	case Neutral:
 		return "Neutral"
+	case IncreasedTradingRisk:
+		return "Increased Trading Risk"
+	case ModerateTradingRisk:
+		return "Moderate Trading Risk"
+	case LowerTradingRisk:
+		return "Lower Trading Risk"
+	case None:
+		return "None"
 	default:
 		return "Unknown TrendType"
 	}
@@ -151,6 +163,7 @@ type Indexes struct {
 	Volume     Volume
 	OBV        OBV
 	RVOL       RVOL
+	ATR        ATR
 }
 
 func NewIndexes(symbol string) *Indexes {
@@ -189,4 +202,8 @@ func NewOBVAdapter(symbol string) (Analyzer, error) {
 
 func NewRVOLAdapter(symbol string) (Analyzer, error) {
 	return NewRVOL(symbol)
+}
+
+func NewATRAdapter(symbol string) (Analyzer, error) {
+	return NewATR(symbol)
 }
