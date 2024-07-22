@@ -61,6 +61,7 @@ func FindIndexesBySymbol(symbol string, from int) (models.Indexes, error) {
 		models.NewOBVAdapter,
 		models.NewRVOLAdapter,
 		models.NewATRAdapter,
+		models.NewMomentumAdapter,
 	}
 
 	for _, newAnalyzer := range analyzers {

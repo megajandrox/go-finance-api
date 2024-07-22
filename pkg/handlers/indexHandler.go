@@ -26,6 +26,8 @@ type IndexResponse struct {
 	RVOLAnalysis                 string `json:"rvol_analysis"`
 	ATRResult                    string `json:"atr_result"`
 	ATRAnalysis                  string `json:"atr_analysis"`
+	MomentumResult               string `json:"momentum_result"`
+	MomentumAnalysis             string `json:"momentum_analysis"`
 }
 
 // getQuote handles the retrieval of stock quotes
@@ -73,6 +75,8 @@ func GetIndex(c *gin.Context) {
 		RVOLAnalysis:                 indexes.RVOL.Result,
 		ATRResult:                    indexes.ATR.TrendType.String(),
 		ATRAnalysis:                  indexes.ATR.Result,
+		MomentumResult:               indexes.Momentum.TrendType.String(),
+		MomentumAnalysis:             indexes.Momentum.Result,
 	}
 
 	c.JSON(http.StatusOK, response)

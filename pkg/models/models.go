@@ -164,6 +164,7 @@ type Indexes struct {
 	OBV        OBV
 	RVOL       RVOL
 	ATR        ATR
+	Momentum   Momentum
 }
 
 func NewIndexes(symbol string) *Indexes {
@@ -206,4 +207,8 @@ func NewRVOLAdapter(symbol string) (Analyzer, error) {
 
 func NewATRAdapter(symbol string) (Analyzer, error) {
 	return NewATR(symbol)
+}
+
+func NewMomentumAdapter(symbol string) (Analyzer, error) {
+	return NewMomentum(symbol)
 }
