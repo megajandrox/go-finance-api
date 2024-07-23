@@ -26,15 +26,13 @@ func (i *MACD) SetIndex(indexes *Indexes) *Indexes {
 }
 
 // calculateMACD calculates the MACD and Signal line
-func (macd *MACD) calculate(closes []float64) (bool, error) {
+func (macd *MACD) calculate(marketDataList []BasicMarketData) (bool, error) {
 	// Calculate EMA for 12-day and 26-day periods
 	ema, errEMA := NewEMA(macd.symbol)
 	if errEMA != nil {
 		return false, fmt.Errorf("Error creating EMA: %v", errEMA)
 	}
-	var inputValues [][]float64
-	inputValues = append(inputValues, closes)
-	ema.Analyze(inputValues)
+	ema.Analyze(marketDataList)
 	var ema12, ema26 []float64
 	ema12 = ema.EMA12
 	ema26 = ema.EMA26
@@ -48,7 +46,7 @@ func (macd *MACD) calculate(closes []float64) (bool, error) {
 		macdArray[i] = ema12[i] - ema26[i]
 	}
 
-	signal, err := ema.CalculateEMA(macdArray, 9)
+	signal, err := ema.CalculateEMAFromMACD(macdArray, 9)
 	if err != nil {
 		return false, fmt.Errorf("error calculating Signal line: %v", err)
 	}
@@ -58,11 +56,11 @@ func (macd *MACD) calculate(closes []float64) (bool, error) {
 }
 
 // analyzeMACD analyzes the MACD and Signal line for crossovers
-func (macd *MACD) Analyze(inputValues [][]float64) error {
+func (macd *MACD) Analyze(marketDataList []BasicMarketData) error {
 	var macdArray, signal []float64
 	var trendType TrendType = Neutral
 	var result string = "The SMAs are not in a clear order to confirm a specific trend."
-	status, err := macd.calculate(inputValues[0])
+	status, err := macd.calculate(marketDataList)
 	if !status {
 		trendType = Neutral
 		result = fmt.Sprintf("It is not possible to calculate MACD due to: %s", err)

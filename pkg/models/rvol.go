@@ -24,9 +24,9 @@ func (i *RVOL) SetIndex(indexes *Indexes) *Indexes {
 	return indexes
 }
 
-func (rvol *RVOL) calculate(volumes []float64) (bool, error) {
+func (rvol *RVOL) calculate(marketDataList []BasicMarketData) (bool, error) {
 	// Calculate RVOL for a 20-day period
-	rvolValue, err := rvol.calculateRVOL(volumes, 20)
+	rvolValue, err := rvol.calculateRVOL(marketDataList, 20)
 	if err != nil {
 		return false, fmt.Errorf("Error calculating RVOL: %v", err)
 	}
@@ -35,7 +35,8 @@ func (rvol *RVOL) calculate(volumes []float64) (bool, error) {
 }
 
 // calculateRVOL calculates the Relative Volume (RVOL)
-func (rvol *RVOL) calculateRVOL(volumes []float64, period int) (float64, error) {
+func (rvol *RVOL) calculateRVOL(marketDataList []BasicMarketData, period int) (float64, error) {
+	_, _, _, volumes := ExtractMarketData(marketDataList)
 	if len(volumes) < period {
 		return 0, fmt.Errorf("not enough data to calculate RVOL for the given period")
 	}
@@ -43,13 +44,13 @@ func (rvol *RVOL) calculateRVOL(volumes []float64, period int) (float64, error) 
 	// Calculate the average volume over the period
 	totalVolume := 0.0
 	for i := len(volumes) - period; i < len(volumes); i++ {
-		totalVolume += volumes[i]
+		totalVolume += float64(volumes[i])
 	}
 	averageVolume := totalVolume / float64(period)
 
 	// Get the most recent volume
 	//TODO obtener el ultimo distinto de cero.
-	currentVolume := volumes[len(volumes)-2]
+	currentVolume := float64(volumes[len(volumes)-2])
 
 	// Calculate the relative volume
 	rvolValue := currentVolume / averageVolume
@@ -58,8 +59,8 @@ func (rvol *RVOL) calculateRVOL(volumes []float64, period int) (float64, error) 
 }
 
 // analyzeRVOL analyzes the RVOL value and returns a descriptive analysis
-func (rvol *RVOL) Analyze(inputValues [][]float64) error {
-	status, err := rvol.calculate(inputValues[3])
+func (rvol *RVOL) Analyze(marketDataList []BasicMarketData) error {
+	status, err := rvol.calculate(marketDataList)
 	rvol.TrendType = Neutral
 	var result string
 	if !status {

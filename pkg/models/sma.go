@@ -26,18 +26,18 @@ func (sma *SMA) SetIndex(indexes *Indexes) *Indexes {
 	return indexes
 }
 
-func (sma *SMA) calculate(closes []float64) (bool, error) {
-	sma40, err := sma.calculateSMAN(closes, 40)
+func (sma *SMA) calculate(marketDataList []BasicMarketData) (bool, error) {
+	sma40, err := sma.calculateSMAN(marketDataList, 40)
 	if err != nil {
 		return false, err
 	}
 	sma.SMA40 = sma40
-	sma80, err := sma.calculateSMAN(closes, 80)
+	sma80, err := sma.calculateSMAN(marketDataList, 80)
 	if err != nil {
 		return false, err
 	}
 	sma.SMA80 = sma80
-	sma200, err := sma.calculateSMAN(closes, 200)
+	sma200, err := sma.calculateSMAN(marketDataList, 200)
 	if err != nil {
 		return false, err
 	}
@@ -45,21 +45,21 @@ func (sma *SMA) calculate(closes []float64) (bool, error) {
 	return true, nil
 }
 
-func (sma *SMA) calculateSMAN(closes []float64, n int) (float64, error) {
+func (sma *SMA) calculateSMAN(marketDataList []BasicMarketData, n int) (float64, error) {
 	// Calculate SMA for the last N days
-	if len(closes) < n {
+	if len(marketDataList) < n {
 		return 0, fmt.Errorf("not enough data to calculate SMA%d", n)
 	}
 	sum := 0.0
-	for i := len(closes) - n; i < len(closes); i++ {
-		sum += closes[i]
+	for i := len(marketDataList) - n; i < len(marketDataList); i++ {
+		sum += marketDataList[i].Close
 	}
 	return sum / float64(n), nil
 }
 
 // analyzeSMATrend analyzes the relationship between the SMAs to determine if it's an uptrend
-func (sma *SMA) Analyze(inputValues [][]float64) error {
-	status, err := sma.calculate(inputValues[0])
+func (sma *SMA) Analyze(marketDataList []BasicMarketData) error {
+	status, err := sma.calculate(marketDataList)
 	var trendType TrendType = Neutral
 	var result string = "The SMAs are not in a clear order to confirm a specific trend."
 	if !status {

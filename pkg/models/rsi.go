@@ -24,9 +24,9 @@ func (i *RSI) SetIndex(indexes *Indexes) *Indexes {
 	return indexes
 }
 
-func (rsi *RSI) calculate(closes []float64) (bool, error) {
+func (rsi *RSI) calculate(marketDataList []BasicMarketData) (bool, error) {
 	// Calculate RSI for 14-day period
-	rsiArray, err := rsi.calculateRSI(closes, 14)
+	rsiArray, err := rsi.calculateRSI(marketDataList, 14)
 	if err != nil {
 		return false, fmt.Errorf(`Error calculating RSI: %v`, err)
 	}
@@ -36,18 +36,18 @@ func (rsi *RSI) calculate(closes []float64) (bool, error) {
 }
 
 // calculateRSI calculates the Relative Strength Index (RSI)
-func (rsi *RSI) calculateRSI(prices []float64, period int) ([]float64, error) {
-	if len(prices) < period {
+func (rsi *RSI) calculateRSI(marketDataList []BasicMarketData, period int) ([]float64, error) {
+	if len(marketDataList) < period {
 		return nil, fmt.Errorf("not enough data to calculate RSI for the given period")
 	}
 
 	// Initialize gains and losses
-	gains := make([]float64, len(prices))
-	losses := make([]float64, len(prices))
+	gains := make([]float64, len(marketDataList))
+	losses := make([]float64, len(marketDataList))
 
 	// Calculate daily gains and losses
-	for i := 1; i < len(prices); i++ {
-		change := prices[i] - prices[i-1]
+	for i := 1; i < len(marketDataList); i++ {
+		change := marketDataList[i].Close - marketDataList[i-1].Close
 		if change > 0 {
 			gains[i] = change
 		} else {
@@ -66,14 +66,14 @@ func (rsi *RSI) calculateRSI(prices []float64, period int) ([]float64, error) {
 	avgLoss /= float64(period)
 
 	// Initialize RSI array
-	rsiArray := make([]float64, len(prices))
+	rsiArray := make([]float64, len(marketDataList))
 
 	// Calculate RSI for the first period
 	rs := avgGain / avgLoss
 	rsiArray[period-1] = 100 - (100 / (1 + rs))
 
 	// Calculate RSI for subsequent periods
-	for i := period; i < len(prices); i++ {
+	for i := period; i < len(marketDataList); i++ {
 		avgGain = (avgGain*float64(period-1) + gains[i]) / float64(period)
 		avgLoss = (avgLoss*float64(period-1) + losses[i]) / float64(period)
 		rs = avgGain / avgLoss
@@ -84,8 +84,8 @@ func (rsi *RSI) calculateRSI(prices []float64, period int) ([]float64, error) {
 }
 
 // analyzeRSI analyzes the RSI value and returns a descriptive analysis
-func (rsi *RSI) Analyze(inputValues [][]float64) error {
-	status, err := rsi.calculate(inputValues[0])
+func (rsi *RSI) Analyze(marketDataList []BasicMarketData) error {
+	status, err := rsi.calculate(marketDataList)
 	var trendType TrendType = Neutral
 	var result string = "The RSIs are not in a clear order to confirm a specific trend."
 	if !status {

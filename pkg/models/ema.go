@@ -25,14 +25,14 @@ func (i *EMA) SetIndex(indexes *Indexes) *Indexes {
 	return indexes
 }
 
-func (ema *EMA) calculate(closes []float64) (bool, error) {
+func (ema *EMA) calculate(marketDataList []BasicMarketData) (bool, error) {
 	// Calculate EMA for 12-day and 26-day periods
-	ema12, err := ema.CalculateEMA(closes, 12)
+	ema12, err := ema.CalculateEMA(marketDataList, 12)
 	if err != nil {
 		return false, fmt.Errorf("Error calculating EMA 12: %v", err)
 	}
 	ema.EMA12 = ema12
-	ema26, err := ema.CalculateEMA(closes, 26)
+	ema26, err := ema.CalculateEMA(marketDataList, 26)
 	if err != nil {
 		return false, fmt.Errorf("Error calculating EMA 26: %v", err)
 	}
@@ -41,7 +41,7 @@ func (ema *EMA) calculate(closes []float64) (bool, error) {
 }
 
 // calculateEMA calculates the Exponential Moving Average (EMA)
-func (ema *EMA) CalculateEMA(prices []float64, period int) ([]float64, error) {
+func (ema *EMA) CalculateEMAFromMACD(prices []float64, period int) ([]float64, error) {
 	if len(prices) < period {
 		return nil, fmt.Errorf("not enough data to calculate EMA for the given period")
 	}
@@ -68,12 +68,40 @@ func (ema *EMA) CalculateEMA(prices []float64, period int) ([]float64, error) {
 	return emaArray[period-1:], nil // Return only the valid EMA values
 }
 
+// calculateEMA calculates the Exponential Moving Average (EMA)
+func (ema *EMA) CalculateEMA(marketDataList []BasicMarketData, period int) ([]float64, error) {
+	if len(marketDataList) < period {
+		return nil, fmt.Errorf("not enough data to calculate EMA for the given period")
+	}
+
+	// Initialize the EMA array with the same length as prices
+	emaArray := make([]float64, len(marketDataList))
+
+	// Calculate the initial SMA to start the EMA
+	sum := 0.0
+	for i := 0; i < period; i++ {
+		sum += marketDataList[i].Close
+	}
+	initialSMA := sum / float64(period)
+	emaArray[period-1] = initialSMA
+
+	// Calculate the smoothing factor
+	alpha := 2.0 / float64(period+1)
+
+	// Calculate the EMA for each subsequent price
+	for i := period; i < len(marketDataList); i++ {
+		emaArray[i] = (marketDataList[i].Close * alpha) + (emaArray[i-1] * (1 - alpha))
+	}
+
+	return emaArray[period-1:], nil // Return only the valid EMA values
+}
+
 // analyzeEMACrossover analyzes the crossover between EMA12 and EMA26
-func (ema *EMA) Analyze(inputValues [][]float64) error {
+func (ema *EMA) Analyze(marketDataList []BasicMarketData) error {
 	var ema12, ema26 []float64
 	var trendType TrendType = Neutral
 	var result string = "The SMAs are not in a clear order to confirm a specific trend."
-	if len(inputValues) == 0 {
+	if len(marketDataList) == 0 {
 		trendType = Neutral
 		result = "Not enough data for analysis."
 		ema.TrendType = trendType
@@ -81,7 +109,7 @@ func (ema *EMA) Analyze(inputValues [][]float64) error {
 		return fmt.Errorf("Not enough data for analysis.")
 	}
 
-	status, err := ema.calculate(inputValues[0])
+	status, err := ema.calculate(marketDataList)
 	if !status {
 		trendType = Neutral
 		result = fmt.Sprintf("It is not possible to calculate EMA due to: %s", err)

@@ -24,9 +24,9 @@ func (i *OBV) SetIndex(indexes *Indexes) *Indexes {
 	return indexes
 }
 
-func (obv *OBV) calculate(closes, volumes []float64) (bool, error) {
+func (obv *OBV) calculate(marketDataList []BasicMarketData) (bool, error) {
 	// Calculate OBV
-	obvArray, err := obv.calculateOBV(closes, volumes)
+	obvArray, err := obv.calculateOBV(marketDataList)
 	if err != nil {
 		return false, fmt.Errorf("Error calculating OBV: %v", err)
 	}
@@ -35,19 +35,20 @@ func (obv *OBV) calculate(closes, volumes []float64) (bool, error) {
 }
 
 // calculateOBV calculates the On-Balance Volume (OBV)
-func (obv *OBV) calculateOBV(closes, volumes []float64) ([]float64, error) {
+func (obv *OBV) calculateOBV(marketDataList []BasicMarketData) ([]float64, error) {
+	closes, _, _, volumes := ExtractMarketData(marketDataList)
 	if len(closes) != len(volumes) {
 		return nil, fmt.Errorf("length of closes and volumes must be the same")
 	}
 
 	obvArray := make([]float64, len(closes))
-	obvArray[0] = volumes[0]
+	obvArray[0] = float64(volumes[0])
 
 	for i := 1; i < len(closes); i++ {
 		if closes[i] > closes[i-1] {
-			obvArray[i] = obvArray[i-1] + volumes[i]
+			obvArray[i] = obvArray[i-1] + float64(volumes[i])
 		} else if closes[i] < closes[i-1] {
-			obvArray[i] = obvArray[i-1] - volumes[i]
+			obvArray[i] = obvArray[i-1] - float64(volumes[i])
 		} else {
 			obvArray[i] = obvArray[i-1]
 		}
@@ -57,8 +58,8 @@ func (obv *OBV) calculateOBV(closes, volumes []float64) ([]float64, error) {
 }
 
 // analyzeOBV analyzes the OBV data to determine accumulation or distribution
-func (obv *OBV) Analyze(inputValues [][]float64) error {
-	status, err := obv.calculate(inputValues[0], inputValues[3])
+func (obv *OBV) Analyze(marketDataList []BasicMarketData) error {
+	status, err := obv.calculate(marketDataList)
 	var trendType TrendType
 	var result string
 	if !status {

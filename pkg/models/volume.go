@@ -26,8 +26,8 @@ func (i *Volume) SetIndex(indexes *Indexes) *Indexes {
 }
 
 // analyzeVolumeTrend analyzes the volume data to confirm the strength of a trend
-func (v *Volume) Analyze(inputValues [][]float64) error {
-	if len(inputValues[3]) < 2 {
+func (v *Volume) Analyze(marketDataList []BasicMarketData) error {
+	if len(marketDataList) < 2 {
 		v.TrendType = Neutral
 		v.Result = "Not enough data to analyze volume trend."
 		return fmt.Errorf("Not enough data to analyze volume trend.")
@@ -35,15 +35,15 @@ func (v *Volume) Analyze(inputValues [][]float64) error {
 
 	totalVolume := 0.0
 	increasingDays := 0
-	for i := 1; i < len(inputValues[3]); i++ {
-		totalVolume += inputValues[3][i]
-		if inputValues[3][i] > inputValues[3][i-1] {
+	for i := 1; i < len(marketDataList); i++ {
+		totalVolume += float64(marketDataList[i].Volume)
+		if marketDataList[i].Volume > marketDataList[i-1].Volume {
 			increasingDays++
 		}
 	}
 
-	averageVolume := totalVolume / float64(len(inputValues[3])-1)
-	increasePercentage := float64(increasingDays) / float64(len(inputValues[3])-1) * 100
+	averageVolume := totalVolume / float64(len(marketDataList)-1)
+	increasePercentage := float64(increasingDays) / float64(len(marketDataList)-1) * 100
 	v.Result = fmt.Sprintf("Average Volume: %.2f\nPercentage of Increasing Volume Days: %.2f%%", averageVolume, increasePercentage)
 	v.TrendType = Neutral
 	return nil

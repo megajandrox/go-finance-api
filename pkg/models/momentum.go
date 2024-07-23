@@ -23,28 +23,28 @@ func (i *Momentum) SetIndex(indexes *Indexes) *Indexes {
 	return indexes
 }
 
-func (m *Momentum) calculateMomentum(inputValues [][]float64, period int) ([]float64, error) {
-	if len(inputValues[0]) < period {
+func (m *Momentum) calculateMomentum(marketDataList []BasicMarketData, period int) ([]float64, error) {
+	if len(marketDataList) < period {
 		return nil, fmt.Errorf("not enough data to calculate momentum for the given period")
 	}
 
 	// Initialize the momentum array
-	momentum := make([]float64, len(inputValues[0])-period)
+	momentum := make([]float64, len(marketDataList)-period)
 
 	// Calculate momentum for each subsequent price
-	for i := period; i < len(inputValues[0]); i++ {
-		momentum[i-period] = inputValues[0][i] - inputValues[0][i-period]
+	for i := period; i < len(marketDataList); i++ {
+		momentum[i-period] = marketDataList[i].Close - marketDataList[i-period].Close
 	}
 
 	return momentum, nil
 }
 
 // analyze ATR analyzes
-func (m *Momentum) Analyze(inputValues [][]float64) error {
+func (m *Momentum) Analyze(marketDataList []BasicMarketData) error {
 	var trendType TrendType
 	var result string
 	period := 10
-	momentum, err := m.calculateMomentum(inputValues, period)
+	momentum, err := m.calculateMomentum(marketDataList, period)
 	if err != nil {
 		return fmt.Errorf("Error calculating momentum: %v", err)
 	}

@@ -33,21 +33,21 @@ func (atr *ATR) calculateTR(high, low, prevClose float64) float64 {
 }
 
 // CalculateATR calculates the Average True Range (ATR) for a given period
-func (atr *ATR) calculateATR(inputValues [][]float64, period int) ([]float64, error) {
-	if len(inputValues[0]) < period {
+func (atr *ATR) calculateATR(marketDataList []BasicMarketData, period int) ([]float64, error) {
+	if len(marketDataList) < period {
 		return nil, fmt.Errorf("not enough data to calculate ATR for the given period")
 	}
 
 	// Initialize TR array
-	trArray := make([]float64, len(inputValues[0]))
+	trArray := make([]float64, len(marketDataList))
 
 	// Calculate TR for each day
-	for i := 1; i < len(inputValues[0]); i++ {
-		trArray[i] = atr.calculateTR(inputValues[2][i], inputValues[1][i], inputValues[0][i-1])
+	for i := 1; i < len(marketDataList); i++ {
+		trArray[i] = atr.calculateTR(marketDataList[i].High, marketDataList[i].Low, marketDataList[i-1].Close)
 	}
 
 	// Initialize ATR array
-	atrArray := make([]float64, len(inputValues[0])-(period-1))
+	atrArray := make([]float64, len(marketDataList)-(period-1))
 
 	// Calculate the initial ATR using the average of the first 'period' TR values
 	sumTR := 0.0
@@ -57,7 +57,7 @@ func (atr *ATR) calculateATR(inputValues [][]float64, period int) ([]float64, er
 	atrArray[0] = sumTR / float64(period)
 
 	// Calculate the ATR for each subsequent day
-	for i := period + 1; i < len(inputValues[0]); i++ {
+	for i := period + 1; i < len(marketDataList); i++ {
 		atrArray[i-period] = ((atrArray[i-period-1] * float64(period-1)) + trArray[i]) / float64(period)
 	}
 
@@ -65,11 +65,11 @@ func (atr *ATR) calculateATR(inputValues [][]float64, period int) ([]float64, er
 }
 
 // analyze ATR analyzes
-func (atr *ATR) Analyze(inputValues [][]float64) error {
+func (atr *ATR) Analyze(marketDataList []BasicMarketData) error {
 	var trendType TrendType
 	var result string
 	period := 30
-	atrArray, err := atr.calculateATR(inputValues, period)
+	atrArray, err := atr.calculateATR(marketDataList, period)
 	if err != nil {
 		fmt.Printf("Error calculating ATR: %v\n", err)
 		atr.TrendType = None

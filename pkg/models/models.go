@@ -52,21 +52,6 @@ func (th *TradeHistory) AddPosition(position Position) {
 }
 
 /*
- * This struct is going to be persisted for the long term because it contains
- */
-// MarketData stores market information obtained periodically.
-type MarketData struct {
-	Symbol     string     // Financial asset symbol
-	Timestamp  time.Time  // Data timestamp
-	Open       float64    // Opening price
-	High       float64    // Highest price
-	Low        float64    // Lowest price
-	Close      float64    // Closing price
-	Volume     int64      // Traded volume
-	Indicators Indicators // Applied technical indicators
-}
-
-/*
  * This struct is not going to be persisted
  */
 // Indicators stores the values of the applied technical indicators.
@@ -98,6 +83,9 @@ const (
 	IncreasedTradingRisk
 	ModerateTradingRisk
 	LowerTradingRisk
+	StrongTrend
+	WeakTrend
+	ModerateTrend
 	None
 )
 
@@ -134,18 +122,41 @@ func (t TrendType) String() string {
 	}
 }
 
+type BasicMarketData struct {
+	High   float64
+	Low    float64
+	Close  float64
+	Volume int64
+}
+
+func ExtractMarketData(data []BasicMarketData) ([]float64, []float64, []float64, []int64) {
+	closes := make([]float64, len(data))
+	highs := make([]float64, len(data))
+	lows := make([]float64, len(data))
+	volumes := make([]int64, len(data))
+
+	for i, d := range data {
+		closes[i] = d.Close
+		highs[i] = d.High
+		lows[i] = d.Low
+		volumes[i] = d.Volume
+	}
+
+	return closes, highs, lows, volumes
+}
+
 type Analyzer interface {
-	Analyze(inputValues [][]float64) error
+	Analyze(marketDataList []BasicMarketData) error
 	SetIndex(indexes *Indexes) *Indexes
 }
 
 // runAnalysis es una función genérica que ejecuta el análisis utilizando la interfaz Analyzer
-func RunAnalysis[T Analyzer](symbol string, inputValues [][]float64, indexes *Indexes, newAnalyzer func(string) (T, error)) (*Indexes, error) {
+func RunAnalysis[T Analyzer](symbol string, marketDataList []BasicMarketData, indexes *Indexes, newAnalyzer func(string) (T, error)) (*Indexes, error) {
 	analyzer, err := newAnalyzer(symbol)
 	if err != nil {
 		return nil, fmt.Errorf("error creating analyzer: %w", err)
 	}
-	err = analyzer.Analyze(inputValues)
+	err = analyzer.Analyze(marketDataList)
 	if err != nil {
 		return nil, fmt.Errorf("error analyzing trend: %w", err)
 	}
@@ -165,6 +176,7 @@ type Indexes struct {
 	RVOL       RVOL
 	ATR        ATR
 	Momentum   Momentum
+	ADR        ADR
 }
 
 func NewIndexes(symbol string) *Indexes {

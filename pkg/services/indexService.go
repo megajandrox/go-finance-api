@@ -30,26 +30,18 @@ func FindIndexesBySymbol(symbol string, from int) (models.Indexes, error) {
 	}
 	iter := chart.Get(params)
 	indexesResult := models.NewIndexes(symbol)
-	var inputValues [][]float64
-	var closes, highs, lows, volumes []float64
+	var marketDataList []models.BasicMarketData
 	for iter.Next() {
 		p := iter.Bar()
 		close, _ := p.Close.Float64()
 		high, _ := p.High.Float64()
 		low, _ := p.Low.Float64()
-		closes = append(closes, close)
-		highs = append(highs, high)
-		lows = append(lows, low)
-		volumes = append(volumes, float64(p.Volume))
+		var marketData = models.BasicMarketData{Close: close, High: high, Low: low, Volume: int64(p.Volume)}
+		marketDataList = append(marketDataList, marketData)
 	}
 	if err := iter.Err(); err != nil {
 		fmt.Println(err)
 	}
-
-	inputValues = append(inputValues, closes)
-	inputValues = append(inputValues, lows)
-	inputValues = append(inputValues, highs)
-	inputValues = append(inputValues, volumes)
 
 	analyzers := []func(string) (models.Analyzer, error){
 		models.NewSMAAdapter,
@@ -66,7 +58,7 @@ func FindIndexesBySymbol(symbol string, from int) (models.Indexes, error) {
 
 	for _, newAnalyzer := range analyzers {
 		var err error
-		indexesResult, err = models.RunAnalysis(symbol, inputValues, indexesResult, newAnalyzer)
+		indexesResult, err = models.RunAnalysis(symbol, marketDataList, indexesResult, newAnalyzer)
 		if err != nil {
 			log.Println("Error running analysis: %v", err)
 		}

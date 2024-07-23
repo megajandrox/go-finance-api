@@ -25,9 +25,9 @@ func (i *Stochastic) SetIndex(indexes *Indexes) *Indexes {
 	return indexes
 }
 
-func (sto *Stochastic) calculate(closes, highs, lows []float64) (bool, error) {
+func (sto *Stochastic) calculate(marketDataList []BasicMarketData) (bool, error) {
 	// Calculate Stochastic Oscillator for 14-day period
-	k, d, err := sto.calculateStochasticOscillator(closes, highs, lows, 14)
+	k, d, err := sto.calculateStochasticOscillator(marketDataList, 14)
 	if err != nil {
 		return false, fmt.Errorf(`Error calculating Stochastic Oscillator: %v`, err)
 	}
@@ -37,7 +37,8 @@ func (sto *Stochastic) calculate(closes, highs, lows []float64) (bool, error) {
 }
 
 // calculateStochasticOscillator calculates the Stochastic Oscillator
-func (sto *Stochastic) calculateStochasticOscillator(closes, highs, lows []float64, period int) ([]float64, []float64, error) {
+func (sto *Stochastic) calculateStochasticOscillator(marketDataList []BasicMarketData, period int) ([]float64, []float64, error) {
+	closes, highs, lows, _ := ExtractMarketData(marketDataList)
 	if len(closes) < period || len(highs) < period || len(lows) < period {
 		return nil, nil, fmt.Errorf("not enough data to calculate Stochastic Oscillator for the given period")
 	}
@@ -67,8 +68,8 @@ func (sto *Stochastic) calculateStochasticOscillator(closes, highs, lows []float
 }
 
 // analyzeStochasticOscillator analyzes the Stochastic Oscillator values
-func (sto *Stochastic) Analyze(inputValues [][]float64) error {
-	status, err := sto.calculate(inputValues[0], inputValues[2], inputValues[1])
+func (sto *Stochastic) Analyze(marketDataList []BasicMarketData) error {
+	status, err := sto.calculate(marketDataList)
 	latestK := sto.K[len(sto.K)-1]
 	latestD := sto.D[len(sto.D)-1]
 	var trendType TrendType = Neutral
