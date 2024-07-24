@@ -73,12 +73,12 @@ func (atr *ATR) Analyze(marketDataList []BasicMarketData) error {
 	if err != nil {
 		fmt.Printf("Error calculating ATR: %v\n", err)
 		atr.TrendType = None
-		atr.Result = fmt.Sprintf("Error calculating ATR: %v\n", err)
+		atr.Result = "None"
 		return fmt.Errorf("Error calculating ATR: %v\n", err)
 	}
 	if len(atrArray) == 0 {
 		atr.TrendType = None
-		atr.Result = fmt.Sprintf("No ATR values provided.")
+		atr.Result = "None"
 		return fmt.Errorf("No ATR values provided.")
 	}
 

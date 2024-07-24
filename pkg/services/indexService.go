@@ -11,7 +11,7 @@ import (
 )
 
 // getQuote handles the retrieval of stock quotes
-func FindIndexesBySymbol(symbol string, from int) (models.Indexes, error) {
+func FindIndexesBySymbol(symbol string, from int, interval string) (models.Indexes, error) {
 	startDateTime := &datetime.Datetime{
 		Month: int(time.Now().AddDate(0, from*-1, 0).Month()),
 		Day:   1,
@@ -24,7 +24,7 @@ func FindIndexesBySymbol(symbol string, from int) (models.Indexes, error) {
 	}
 	params := &chart.Params{
 		Symbol:   symbol,
-		Interval: datetime.OneHour,
+		Interval: datetime.Interval(interval),
 		Start:    startDateTime,
 		End:      endDateTime,
 	}
@@ -54,6 +54,7 @@ func FindIndexesBySymbol(symbol string, from int) (models.Indexes, error) {
 		models.NewRVOLAdapter,
 		models.NewATRAdapter,
 		models.NewMomentumAdapter,
+		models.NewCCIAdapter,
 	}
 
 	for _, newAnalyzer := range analyzers {

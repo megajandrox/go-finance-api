@@ -177,6 +177,7 @@ type Indexes struct {
 	ATR        ATR
 	Momentum   Momentum
 	ADR        ADX
+	CCI        CCI
 }
 
 func NewIndexes(symbol string) *Indexes {
@@ -223,4 +224,8 @@ func NewATRAdapter(symbol string) (Analyzer, error) {
 
 func NewMomentumAdapter(symbol string) (Analyzer, error) {
 	return NewMomentum(symbol)
+}
+
+func NewCCIAdapter(symbol string) (Analyzer, error) {
+	return NewCCI(symbol)
 }

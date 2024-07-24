@@ -28,12 +28,15 @@ type IndexResponse struct {
 	ADXAnalysis                  string `json:"adx_analysis"`
 	MomentumResult               string `json:"momentum_result"`
 	MomentumAnalysis             string `json:"momentum_analysis"`
+	CCIResult                    string `json:"cci_result"`
+	CCIAnalysis                  string `json:"cci_analysis"`
 }
 
 // getQuote handles the retrieval of stock quotes
 func GetIndex(c *gin.Context) {
 	symbol := c.Param("symbol")
 	fromParam := c.Query("from")
+	intervalParam := c.Query("interval")
 	if fromParam == "" {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": "Query parameter 'from' is required.",
@@ -57,7 +60,14 @@ func GetIndex(c *gin.Context) {
 		return
 	}
 
-	indexes, _ := services.FindIndexesBySymbol(symbol, from)
+	if !IsValidInterval(Interval(intervalParam)) {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "Invalid query parameter. 'Interval' must be at least 1h or 1d.",
+		})
+		return
+	}
+
+	indexes, _ := services.FindIndexesBySymbol(symbol, from, intervalParam)
 	response := IndexResponse{
 		Symbol:                       symbol,
 		SMAResult:                    indexes.SMA.TrendType.String(),
@@ -77,6 +87,8 @@ func GetIndex(c *gin.Context) {
 		ADXAnalysis:                  indexes.ATR.Result,
 		MomentumResult:               indexes.Momentum.TrendType.String(),
 		MomentumAnalysis:             indexes.Momentum.Result,
+		CCIResult:                    indexes.CCI.TrendType.String(),
+		CCIAnalysis:                  indexes.CCI.Result,
 	}
 
 	c.JSON(http.StatusOK, response)
