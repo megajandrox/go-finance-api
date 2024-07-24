@@ -24,8 +24,8 @@ type IndexResponse struct {
 	VolumeAnalysis               string `json:"volume_analysis"`
 	OBVAnalysis                  string `json:"obv_analysis"`
 	RVOLAnalysis                 string `json:"rvol_analysis"`
-	ATRResult                    string `json:"atr_result"`
-	ATRAnalysis                  string `json:"atr_analysis"`
+	ADXResult                    string `json:"adx_result"`
+	ADXAnalysis                  string `json:"adx_analysis"`
 	MomentumResult               string `json:"momentum_result"`
 	MomentumAnalysis             string `json:"momentum_analysis"`
 }
@@ -73,8 +73,8 @@ func GetIndex(c *gin.Context) {
 		VolumeAnalysis:               indexes.Volume.Result,
 		OBVAnalysis:                  indexes.OBV.Result,
 		RVOLAnalysis:                 indexes.RVOL.Result,
-		ATRResult:                    indexes.ATR.TrendType.String(),
-		ATRAnalysis:                  indexes.ATR.Result,
+		ADXResult:                    indexes.ATR.TrendType.String(),
+		ADXAnalysis:                  indexes.ATR.Result,
 		MomentumResult:               indexes.Momentum.TrendType.String(),
 		MomentumAnalysis:             indexes.Momentum.Result,
 	}

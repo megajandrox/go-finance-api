@@ -176,7 +176,7 @@ type Indexes struct {
 	RVOL       RVOL
 	ATR        ATR
 	Momentum   Momentum
-	ADR        ADR
+	ADR        ADX
 }
 
 func NewIndexes(symbol string) *Indexes {

@@ -6,26 +6,26 @@ import (
 	"math"
 )
 
-type ADR struct {
+type ADX struct {
 	symbol    string
 	TrendType TrendType
 	Result    string
 }
 
-func NewADR(symbol string) (*ADR, error) {
+func NewADR(symbol string) (*ADX, error) {
 	if symbol == "" {
 		return nil, errors.New("symbol cannot be empty")
 	}
-	return &ADR{symbol: symbol}, nil
+	return &ADX{symbol: symbol}, nil
 }
 
-func (i *ADR) SetIndex(indexes *Indexes) *Indexes {
+func (i *ADX) SetIndex(indexes *Indexes) *Indexes {
 	indexes.ADR = *i
 	return indexes
 }
 
 // CalculateTR calculates the True Range (TR) for a given day
-func (adr *ADR) calculateTR(current, previous BasicMarketData) float64 {
+func (adr *ADX) calculateTR(current, previous BasicMarketData) float64 {
 	tr1 := current.High - current.Low
 	tr2 := math.Abs(current.High - previous.Close)
 	tr3 := math.Abs(current.Low - previous.Close)
@@ -33,7 +33,7 @@ func (adr *ADR) calculateTR(current, previous BasicMarketData) float64 {
 }
 
 // CalculateDM calculates the +DM and -DM for a given day
-func (adr *ADR) calculateDM(current, previous BasicMarketData) (float64, float64) {
+func (adr *ADX) calculateDM(current, previous BasicMarketData) (float64, float64) {
 	upMove := current.High - previous.High
 	downMove := previous.Low - current.Low
 
@@ -51,7 +51,7 @@ func (adr *ADR) calculateDM(current, previous BasicMarketData) (float64, float64
 }
 
 // CalculateADX calculates the ADX for a given period
-func (adr *ADR) calculateADX(marketDataList []BasicMarketData, period int) ([]float64, error) {
+func (adr *ADX) calculateADX(marketDataList []BasicMarketData, period int) ([]float64, error) {
 	if len(marketDataList) < period+1 {
 		return nil, fmt.Errorf("not enough data to calculate ADX for the given period")
 	}
@@ -109,7 +109,7 @@ func (adr *ADR) calculateADX(marketDataList []BasicMarketData, period int) ([]fl
 }
 
 // AnalyzeADX analyzes the ADX values and provides a description of the trend strength
-func (adr *ADR) Analyze(marketDataList []BasicMarketData) error {
+func (adr *ADX) Analyze(marketDataList []BasicMarketData) error {
 	var trendType TrendType
 	var result string
 	period := 3
