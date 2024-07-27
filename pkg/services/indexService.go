@@ -10,6 +10,11 @@ import (
 	"github.com/piquette/finance-go/datetime"
 )
 
+func ConvertTimestamp(timestamp int64) string {
+	t := time.Unix(timestamp, 0)
+	return t.Format("2006-01-02 15:04")
+}
+
 // getQuote handles the retrieval of stock quotes
 func FindIndexesBySymbol(symbol string, from int, interval string) (models.Indexes, error) {
 	startDateTime := &datetime.Datetime{
@@ -36,7 +41,9 @@ func FindIndexesBySymbol(symbol string, from int, interval string) (models.Index
 		close, _ := p.Close.Float64()
 		high, _ := p.High.Float64()
 		low, _ := p.Low.Float64()
-		var marketData = models.BasicMarketData{Close: close, High: high, Low: low, Volume: int64(p.Volume)}
+		var marketData = models.BasicMarketData{Close: close, High: high, Low: low, Volume: int64(p.Volume), TimeStamp: int64(p.Timestamp)}
+		fmt.Println(marketData)
+		fmt.Printf(" FECHA: %s", ConvertTimestamp(marketData.TimeStamp))
 		marketDataList = append(marketDataList, marketData)
 	}
 	if err := iter.Err(); err != nil {
@@ -53,6 +60,7 @@ func FindIndexesBySymbol(symbol string, from int, interval string) (models.Index
 		models.NewOBVAdapter,
 		models.NewRVOLAdapter,
 		models.NewATRAdapter,
+		models.NewADXAdapter,
 		models.NewMomentumAdapter,
 		models.NewCCIAdapter,
 	}

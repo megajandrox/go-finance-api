@@ -12,7 +12,7 @@ type ADX struct {
 	Result    string
 }
 
-func NewADR(symbol string) (*ADX, error) {
+func NewADX(symbol string) (*ADX, error) {
 	if symbol == "" {
 		return nil, errors.New("symbol cannot be empty")
 	}
@@ -20,7 +20,7 @@ func NewADR(symbol string) (*ADX, error) {
 }
 
 func (i *ADX) SetIndex(indexes *Indexes) *Indexes {
-	indexes.ADR = *i
+	indexes.ADX = *i
 	return indexes
 }
 
@@ -112,7 +112,8 @@ func (adr *ADX) calculateADX(marketDataList []BasicMarketData, period int) ([]fl
 func (adr *ADX) Analyze(marketDataList []BasicMarketData) error {
 	var trendType TrendType
 	var result string
-	period := 3
+	period := 14
+	//dailyCloses := ExtractDailyCloses(marketDataList)
 	adxValues, err := adr.calculateADX(marketDataList, period)
 	if err != nil {
 		adr.TrendType = None

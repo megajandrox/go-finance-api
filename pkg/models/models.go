@@ -34,7 +34,6 @@ type Position struct {
 	PositionType PositionType // Position type (buy or sell)
 	MarketType   MarketType   // Market (Equities, ETFs)
 	Balance      float64      // Profit or loss
-	Indicators   Indicators   // Technical indicators used in the decision
 }
 
 /*
@@ -49,22 +48,6 @@ type TradeHistory struct {
 func (th *TradeHistory) AddPosition(position Position) {
 	th.Positions = append(th.Positions, position)
 	th.TotalBalance += position.Balance
-}
-
-/*
- * This struct is not going to be persisted
- */
-// Indicators stores the values of the applied technical indicators.
-type Indicators struct {
-	SMA40      float64 // 40-day Simple Moving Average
-	SMA80      float64 // 80-day Simple Moving Average
-	SMA200     float64 // 200-day Simple Moving Average
-	EMA12      float64 // 12-day Exponential Moving Average
-	EMA26      float64 // 26-day Exponential Moving Average
-	RSI14      float64 // 14-day Relative Strength Index
-	MACD       float64 // MACD
-	MACDSignal float64 // MACD Signal
-	ATR14      float64 // 14-day ATR
 }
 
 type TrendType int
@@ -123,10 +106,11 @@ func (t TrendType) String() string {
 }
 
 type BasicMarketData struct {
-	High   float64
-	Low    float64
-	Close  float64
-	Volume int64
+	High      float64
+	Low       float64
+	Close     float64
+	Volume    int64
+	TimeStamp int64
 }
 
 func ExtractMarketData(data []BasicMarketData) ([]float64, []float64, []float64, []int64) {
@@ -176,7 +160,7 @@ type Indexes struct {
 	RVOL       RVOL
 	ATR        ATR
 	Momentum   Momentum
-	ADR        ADX
+	ADX        ADX
 	CCI        CCI
 }
 
@@ -228,4 +212,8 @@ func NewMomentumAdapter(symbol string) (Analyzer, error) {
 
 func NewCCIAdapter(symbol string) (Analyzer, error) {
 	return NewCCI(symbol)
+}
+
+func NewADXAdapter(symbol string) (Analyzer, error) {
+	return NewADX(symbol)
 }

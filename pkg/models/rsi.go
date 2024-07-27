@@ -26,7 +26,8 @@ func (i *RSI) SetIndex(indexes *Indexes) *Indexes {
 
 func (rsi *RSI) calculate(marketDataList []BasicMarketData) (bool, error) {
 	// Calculate RSI for 14-day period
-	rsiArray, err := rsi.calculateRSI(marketDataList, 14)
+	dailyCloses := ExtractDailyCloses(marketDataList)
+	rsiArray, err := rsi.calculateRSI(dailyCloses, 14)
 	if err != nil {
 		return false, fmt.Errorf(`Error calculating RSI: %v`, err)
 	}
@@ -35,7 +36,7 @@ func (rsi *RSI) calculate(marketDataList []BasicMarketData) (bool, error) {
 	return true, nil
 }
 
-// calculateRSI calculates the Relative Strength Index (RSI)
+// CalculateRSI calculates the RSI for a given period
 func (rsi *RSI) calculateRSI(marketDataList []BasicMarketData, period int) ([]float64, error) {
 	if len(marketDataList) < period {
 		return nil, fmt.Errorf("not enough data to calculate RSI for the given period")
