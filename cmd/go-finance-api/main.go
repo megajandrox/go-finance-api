@@ -14,11 +14,12 @@ func main() {
 	router := gin.Default()
 	db := middleweare.InitializeDatabase()
 	positionRepo := repository.NewPositionRepository(db)
+	assetRepo := repository.NewAssetRepository(db)
 	v1 := router.Group("/api/v1")
 	{
 		routerapi.QuoteRoutes(v1)
 		routerapi.IndexRoutes(v1)
-		routerapi.PositionRoutes(v1, positionRepo)
+		routerapi.AssetRoutes(v1, assetRepo, positionRepo)
 	}
 
 	// Start the HTTP server

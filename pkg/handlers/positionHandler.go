@@ -18,8 +18,17 @@ func BuyPosition(repo repository.PositionRepository) gin.HandlerFunc {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
+		idStr := c.Param("id")
+		idInt, err := strconv.Atoi(idStr)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
+			return
+		}
+
+		// Convertir el entero a uint
+		assetId := uint(idInt)
 		//TODO falta validar que exista la accion y que la cantidad sea positiva
-		position, errNew := models.NewPosition(addPosition.Symbol, addPosition.Price, addPosition.Quantity, addPosition.MarketType)
+		position, errNew := models.NewPosition(assetId, addPosition.Symbol, addPosition.Price, addPosition.Quantity, addPosition.MarketType)
 		if errNew != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": errNew.Error()})
 			return
@@ -40,7 +49,7 @@ func SellPosition(repo repository.PositionRepository) gin.HandlerFunc {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
-		idStr := c.Param("id")
+		idStr := c.Param("idPosition")
 		idInt, err := strconv.Atoi(idStr)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
@@ -54,7 +63,7 @@ func SellPosition(repo repository.PositionRepository) gin.HandlerFunc {
 			c.JSON(http.StatusNotFound, gin.H{"error": errGetByID.Error()})
 			return
 		}
-		if sellPosition.Quantity >= position.Quantity {
+		if sellPosition.Quantity > position.Quantity {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Incorrect quantity, should be greather than previous one."})
 			return
 		}

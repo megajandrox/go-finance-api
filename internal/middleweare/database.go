@@ -37,7 +37,7 @@ func InitializeDatabase() *gorm.DB {
 	}
 
 	// Migrar el esquema
-	db.AutoMigrate(&models.Position{})
+	db.AutoMigrate(&models.Asset{}, &models.Position{})
 
 	fmt.Println("Database connected and migrated successfully")
 	return db

@@ -38,27 +38,23 @@ type Position struct {
 	PositionType PositionType // Position type (buy or sell)
 	MarketType   MarketType   // Market (Equities, ETFs)
 	Balance      float64      // Profit or loss
+	AssetID      uint         // Foreign key to Asset
 }
 
-func NewPosition(symb string, price float64, qty int, marketType MarketType) (*Position, error) {
+func NewPosition(assetId uint, symb string, price float64, qty int, marketType MarketType) (*Position, error) {
 	if symb == "" {
 		return nil, errors.New("symbol cannot be empty")
 	}
-	return &Position{Symbol: symb, EntryPrice: price, Quantity: qty, MarketType: marketType, EntryTime: time.Now(), PositionType: Bought}, nil
+	return &Position{AssetID: assetId, Symbol: symb, EntryPrice: price, Quantity: qty, MarketType: marketType, EntryTime: time.Now(), PositionType: Bought}, nil
 }
 
 /*
  * This struct could be persisted for the short term
  */
-type TradeHistory struct {
-	Positions    []Position // List of all positions
-	TotalBalance float64    // Total profit or loss
-}
-
-// AddPosition adds a position to the history and updates the total profit/loss.
-func (th *TradeHistory) AddPosition(position Position) {
-	th.Positions = append(th.Positions, position)
-	th.TotalBalance += position.Balance
+type Asset struct {
+	gorm.Model
+	Symbol    string     `json:"symbol"`              // Financial asset symbol
+	Positions []Position `json:"positions,omitempty"` // List of positions, optional
 }
 
 type TrendType int

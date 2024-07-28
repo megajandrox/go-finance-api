@@ -24,12 +24,16 @@ func IndexRoutes(v1 *gin.RouterGroup) {
 	}
 }
 
-func PositionRoutes(v1 *gin.RouterGroup, repo repository.PositionRepository) {
-	quoteGroup := v1.Group("/position")
+func AssetRoutes(v1 *gin.RouterGroup, repo repository.AssetRepository, repo2 repository.PositionRepository) {
+	assetGroup := v1.Group("/assets")
 	{
-
-		quoteGroup.POST("/", handlers.BuyPosition(repo))
-		quoteGroup.PUT("/:id", handlers.SellPosition(repo))
-
+		assetGroup.GET("/", handlers.GetAllAssets(repo))
+		assetGroup.POST("/", handlers.CreateAsset(repo))
+		assetGroup.PUT("/:id", handlers.UpdateAsset(repo))
+		positionGroup := assetGroup.Group("/:id/positions")
+		{
+			positionGroup.POST("/", handlers.BuyPosition(repo2))
+			positionGroup.PUT("/:idPosition", handlers.SellPosition(repo2))
+		}
 	}
 }
