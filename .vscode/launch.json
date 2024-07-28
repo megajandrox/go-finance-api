@@ -1,0 +1,15 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "name": "go-finance-api",
+        "type": "go",
+        "request": "launch",
+        "mode": "auto",
+        "program": "${workspaceFolder}/cmd/go-finance-api",
+        "envFile": "${workspaceFolder}/.env",
+        "cwd": "${workspaceFolder}"
+      }
+    ]
+}
+  

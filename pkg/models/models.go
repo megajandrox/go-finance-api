@@ -1,16 +1,19 @@
 package models
 
 import (
+	"errors"
 	"fmt"
 	"time"
+
+	"gorm.io/gorm"
 )
 
 type PositionType int
 
 // Define constants representing the enumerator values
 const (
-	Sell PositionType = iota
-	Buy
+	Bought PositionType = iota
+	Sold
 )
 
 type MarketType int
@@ -25,6 +28,7 @@ const (
  * This struct is going to be persisted for the long term
  */
 type Position struct {
+	gorm.Model
 	Symbol       string       // Financial asset symbol
 	EntryPrice   float64      // Entry price
 	ExitPrice    float64      // Exit price
@@ -34,6 +38,13 @@ type Position struct {
 	PositionType PositionType // Position type (buy or sell)
 	MarketType   MarketType   // Market (Equities, ETFs)
 	Balance      float64      // Profit or loss
+}
+
+func NewPosition(symb string, price float64, qty int, marketType MarketType) (*Position, error) {
+	if symb == "" {
+		return nil, errors.New("symbol cannot be empty")
+	}
+	return &Position{Symbol: symb, EntryPrice: price, Quantity: qty, MarketType: marketType, EntryTime: time.Now(), PositionType: Bought}, nil
 }
 
 /*

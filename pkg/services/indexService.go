@@ -42,8 +42,6 @@ func FindIndexesBySymbol(symbol string, from int, interval string) (models.Index
 		high, _ := p.High.Float64()
 		low, _ := p.Low.Float64()
 		var marketData = models.BasicMarketData{Close: close, High: high, Low: low, Volume: int64(p.Volume), TimeStamp: int64(p.Timestamp)}
-		fmt.Println(marketData)
-		fmt.Printf(" FECHA: %s", ConvertTimestamp(marketData.TimeStamp))
 		marketDataList = append(marketDataList, marketData)
 	}
 	if err := iter.Err(); err != nil {
